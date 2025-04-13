@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Live Bus Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; text-align: center; }
+    h2 { margin: 20px 0; }
+    #map { height: 80vh; width: 100%; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <h2>🚌 Live ESP32 GPS Tracker</h2>
+  <p id="status">Connecting to ESP32...</p>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const esp32_ip = "http://192.168.4.1/location"; // Replace with your ESP32's IP (or tunnel/public IP)
+
+    const map = L.map('map').setView([13.1107, 80.1185], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    const marker = L.marker([13.1107, 80.1185]).addTo(map).bindPopup('Bus Location').openPopup();
+
+    async function updateLocation() {
+      try {
+        const res = await fetch(esp32_ip);
+        const data = await res.json();
+        document.getElementById('status').textContent =
+          `Lat: ${data.lat.toFixed(6)}, Lon: ${data.lon.toFixed(6)}, Speed: ${data.speed.toFixed(1)} km/h`;
+
+        marker.setLatLng([data.lat, data.lon]);
+        map.setView([data.lat, data.lon]);
+      } catch (err) {
+        document.getElementById('status').textContent = 'Unable to connect to ESP32';
+      }
+    }
+
+    setInterval(updateLocation, 5000);
+  </script>
+</body>
+</html>
