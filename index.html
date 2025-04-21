@@ -1,47 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Live GPS Tracker</title>
+  <meta charset="UTF-8">
+  <title>Live Location</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <style>
-    #map { height: 100vh; width: 100vw; }
+    #map { height: 90vh; width: 100%; }
+    h3 { text-align: center; }
   </style>
 </head>
 <body>
+  <h3>Live GPS Location</h3>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const map = L.map('map').setView([0, 0], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-      maxZoom: 18
-    }).addTo(map);
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    const busIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-      iconSize: [40, 40],
-      iconAnchor: [20, 20]
+    const firebaseConfig = {
+      apiKey: "AIzaSyBEgb15uKQSfReeafXrPi12uRvnIWFIZJE",
+      authDomain: "esp32-tracker-8d016.firebaseapp.com",
+      databaseURL: "https://esp32-tracker-8d016-default-rtdb.firebaseio.com",
+      projectId: "esp32-tracker-8d016",
+      storageBucket: "esp32-tracker-8d016.appspot.com",
+      messagingSenderId: "704973480507",
+      appId: "1:704973480507:web:f87ca76819432cabe7f21e",
+      measurementId: "G-36FG8CD62W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let lat = 0, lon = 0;
+    const map = L.map('map').setView([12.9, 80.1], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+    const marker = L.marker([lat, lon]).addTo(map);
+
+    onValue(ref(db, "live_data/lat"), (snapshot) => {
+      lat = snapshot.val();
+      if (lat && lon) {
+        marker.setLatLng([lat, lon]);
+        map.setView([lat, lon]);
+      }
     });
 
-    const marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
-
-    async function fetchLocation() {
-      try {
-        const res = await fetch("https://esp32-tracker-8d016-default-rtdb.firebaseio.com/");
-        const data = await res.json();
-        const { lat, lng } = data;
-
-        marker.setLatLng([lat, lng]);
-        map.setView([lat, lng]);
-      } catch (err) {
-        console.error("Error:", err);
+    onValue(ref(db, "live_data/lon"), (snapshot) => {
+      lon = snapshot.val();
+      if (lat && lon) {
+        marker.setLatLng([lat, lon]);
+        map.setView([lat, lon]);
       }
-    }
-
-    fetchLocation();
-    setInterval(fetchLocation, 3000);
+    });
   </script>
 </body>
 </html>
-
