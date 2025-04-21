@@ -1,88 +1,47 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 Live Bus Tracker</title>
+  <title>Live GPS Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
   <style>
-    body { margin: 0; font-family: sans-serif; background: #eef1f4; text-align: center; }
-    h2 { margin: 20px 0 10px; }
-    #map { height: 80vh; width: 95vw; max-width: 1200px; margin: auto; border-radius: 10px; }
-    #info { margin: 10px; font-size: 1rem; }
+    #map { height: 100vh; width: 100vw; }
   </style>
 </head>
 <body>
-  <h2>🚌 ESP32 Live GPS Tracker</h2>
-  <div id="info">Loading location...</div>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
   <script>
-    // 🌐 YOUR F
-    const firebaseConfig = {
-      // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBEgb15uKQSfReeafXrPi12uRvnIWFIZJE",
-  authDomain: "esp32-tracker-8d016.firebaseapp.com",
-  databaseURL: "https://esp32-tracker-8d016-default-rtdb.firebaseio.com",
-  projectId: "esp32-tracker-8d016",
-  storageBucket: "esp32-tracker-8d016.firebasestorage.app",
-  messagingSenderId: "704973480507",
-  appId: "1:704973480507:web:f87ca76819432cabe7f21e",
-  measurementId: "G-36FG8CD62W"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
     const map = L.map('map').setView([0, 0], 15);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-      maxZoom: 19,
+      maxZoom: 18
     }).addTo(map);
 
     const busIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/128/18303/18303358.png',
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
       iconSize: [40, 40],
       iconAnchor: [20, 20]
     });
 
-    const marker = L.marker([0, 0], {
-      icon: busIcon,
-      rotationAngle: 0,
-      rotationOrigin: 'center center'
-    }).addTo(map);
+    const marker = L.marker([0, 0], { icon: busIcon }).addTo(map);
 
-    function updateMarker(lat, lon, speed, dir) {
-      const position = [lat, lon];
-      marker.setLatLng(position);
-      marker.setRotationAngle(dir);
-      map.setView(position, 15);
-      document.getElementById("info").innerHTML =
-        `📍 Lat: ${lat.toFixed(6)}, Lng: ${lon.toFixed(6)}<br>
-         🚀 Speed: ${speed.toFixed(1)} km/h<br>
-         🧭 Heading: ${dir.toFixed(1)}°`;
+    async function fetchLocation() {
+      try {
+        const res = await fetch("https://esp32-tracker-8d016-default-rtdb.firebaseio.com/");
+        const data = await res.json();
+        const { lat, lng } = data;
+
+        marker.setLatLng([lat, lng]);
+        map.setView([lat, lng]);
+      } catch (err) {
+        console.error("Error:", err);
+      }
     }
 
-    db.ref("/bus").on("value", (snapshot) => {
-      const data = snapshot.val();
-      if (data) updateMarker(data.lat, data.lon, data.speed, data.dir);
-    });
+    fetchLocation();
+    setInterval(fetchLocation, 3000);
   </script>
 </body>
 </html>
+
