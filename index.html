@@ -1,60 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Live Location</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-  <style>
-    #map { height: 90vh; width: 100%; }
-    h3 { text-align: center; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ESP32 GPS Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  />
 </head>
 <body>
-  <h3>Live GPS Location</h3>
+  <h2>Live ESP32 GPS Tracker</h2>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBEgb15uKQSfReeafXrPi12uRvnIWFIZJE",
-      authDomain: "esp32-tracker-8d016.firebaseapp.com",
-      databaseURL: "https://esp32-tracker-8d016-default-rtdb.firebaseio.com",
-      projectId: "esp32-tracker-8d016",
-      storageBucket: "esp32-tracker-8d016.appspot.com",
-      messagingSenderId: "704973480507",
-      appId: "1:704973480507:web:f87ca76819432cabe7f21e",
-      measurementId: "G-36FG8CD62W"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let lat = 0, lon = 0;
-    const map = L.map('map').setView([12.9, 80.1], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    }).addTo(map);
-    const marker = L.marker([lat, lon]).addTo(map);
-
-    onValue(ref(db, "live_data/lat"), (snapshot) => {
-      lat = snapshot.val();
-      if (lat && lon) {
-        marker.setLatLng([lat, lon]);
-        map.setView([lat, lon]);
-      }
-    });
-
-    onValue(ref(db, "live_data/lon"), (snapshot) => {
-      lon = snapshot.val();
-      if (lat && lon) {
-        marker.setLatLng([lat, lon]);
-        map.setView([lat, lon]);
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
