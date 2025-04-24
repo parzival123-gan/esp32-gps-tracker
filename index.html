@@ -13,7 +13,12 @@
 <body>
   <h2>Live ESP32 GPS Tracker</h2>
   <div id="map"></div>
-
+  <div id="info">
+    <p>Latitude: <span id="lat">0.000000</span></p>
+    <p>Longitude: <span id="lon">0.000000</span></p>
+    <p>Distance to Target: <span id="distance">0.00</span> meters</p>
+  </div>
+  
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>
