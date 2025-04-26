@@ -1,25 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ESP32 GPS Tracker</title>
-  <link rel="stylesheet" href="style.css" />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-  />
+  <title>ESP32 Live GPS Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    #map { height: 100vh; width: 100%; }
+  </style>
+  <!-- Leaflet Maps CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
-  <h2>Live ESP32 GPS Tracker</h2>
-  <div id="map"></div>
-  <div id="info">
-    <p>Latitude: <span id="lat">0.000000</span></p>
-    <p>Longitude: <span id="lon">0.000000</span></p>
-    <p>Distance to Target: <span id="distance">0.00</span> meters</p>
-  </div>
+
+<div id="map"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<!-- Leaflet Maps JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  // Your Firebase configuration
+  const firebaseConfig = {
+     apiKey: "AIzaSyBEgb15uKQSfReeafXrPi12uRvnIWFIZJE",
+    authDomain: "esp32-tracker-8d016.firebaseapp.com",
+    databaseURL: "https://esp32-tracker-8d016-default-rtdb.firebaseio.com",
+  projectId: "esp32-tracker-8d016",
+  storageBucket: "esp32-tracker-8d016.firebasestorage.app",
+  messagingSenderId: "704973480507",
+  appId: "1:704973480507:web:f87ca76819432cabe7f21e",
+  measurementId: "G-36FG8CD62W
+  };
   
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  var database = firebase.database();
+
+  // Initialize map
+  var map = L.map('map').setView([0, 0], 2); // Start at 0,0
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data © OpenStreetMap contributors'
+  }).addTo(map);
+
+  var marker = L.marker([0, 0]).addTo(map);
+
+  // Listen for location changes
+  database.ref('/location').on('value', (snapshot) => {
+    var data = snapshot.val();
+    if (data) {
+      var lat = data.latitude;
+      var lng = data.longitude;
+      marker.setLatLng([lat, lng]);
+      map.setView([lat, lng], 18);
+    }
+  });
+</script>
+
 </body>
 </html>
